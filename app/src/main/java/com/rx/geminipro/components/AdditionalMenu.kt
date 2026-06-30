@@ -37,7 +37,7 @@ data class MenuItemData(
 fun AdditionalMenuItem(painter: Painter, name: String, onClick: () -> Unit)
 {
     val haptic = LocalHapticFeedback.current
-    Column(modifier = Modifier.padding(horizontal = 5.dp),){
+    Column(modifier = Modifier.padding(horizontal = 5.dp)){
         IconButton(
             modifier = Modifier.align(Alignment.CenterHorizontally).size(70.dp),
             onClick =
