@@ -8,14 +8,14 @@ plugins {
 
 android {
     namespace = "com.rx.geminipro"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.rx.geminipro"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 207
-        versionName = "1.7.4"
+        versionName = "1.7.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -25,7 +25,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }

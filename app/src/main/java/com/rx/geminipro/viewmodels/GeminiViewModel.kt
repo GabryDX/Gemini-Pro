@@ -27,7 +27,7 @@ class GeminiViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val googleServices: GoogleServices,
     private val clipboardHelper: ClipboardHelper,
-    application: Application
+    application: Application,
 ) : AndroidViewModel(application) {
     private val  _uiState = MutableStateFlow(GeminiUiState())
     val uiState: StateFlow<GeminiUiState> = _uiState.asStateFlow()
@@ -84,9 +84,11 @@ class GeminiViewModel @Inject constructor(
             is GeminiUiEvent.UpdateClicked -> {
                 val url = UpdateChecker.getReleaseUrl()
                 viewModelScope.launch {
-                    _sideEffectChannel.send(GeminiSideEffect.LaunchIntent(
-                        Intent(Intent.ACTION_VIEW, url.toUri())
-                    ))
+                    _sideEffectChannel.send(
+                        GeminiSideEffect.LaunchIntent(
+                            Intent(Intent.ACTION_VIEW, url.toUri()),
+                        )
+                    )
                 }
                 _uiState.update { it.copy(updateInfo = null) }
             }
@@ -125,7 +127,7 @@ class GeminiViewModel @Inject constructor(
             val updateInfo = UpdateChecker.checkForNewVersion()
             val skippedVersion = userPreferencesRepository.skippedVersionFlow.firstOrNull()
 
-            if (updateInfo != null && updateInfo.version != skippedVersion) {
+            if ((updateInfo != null) && (updateInfo.version != skippedVersion)) {
                 _uiState.update { it.copy(updateInfo = updateInfo) }
             }
         }

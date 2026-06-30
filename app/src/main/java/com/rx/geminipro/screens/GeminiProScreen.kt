@@ -39,7 +39,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun GeminiProScreen(
     modifier: Modifier = Modifier,
-    viewModel: GeminiViewModel = hiltViewModel()
+    viewModel: GeminiViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -47,11 +47,11 @@ fun GeminiProScreen(
 
     var webView by remember { mutableStateOf<WebView?>(null) }
 
-    var showAdditionalMenu by remember { mutableStateOf(false) }
-    var showDiagram by remember { mutableStateOf(false) }
-    var showHtmlPreview by remember { mutableStateOf(false) }
-    var clipboardText by remember { mutableStateOf("") }
-    var isHighlightingMenu by remember { mutableStateOf(false) }
+    var showAdditionalMenu by remember { mutableStateOf(value = false) }
+    var showDiagram by remember { mutableStateOf(value = false) }
+    var showHtmlPreview by remember { mutableStateOf(value = false) }
+    var clipboardText by remember { mutableStateOf(value = "") }
+    var isHighlightingMenu by remember { mutableStateOf(value = false) }
 
     var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -64,7 +64,7 @@ fun GeminiProScreen(
     // --- File Picker Setup ---
     val filePathCallbackState = remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
     val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
+        contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
         if (filePathCallbackState.value == null) return@rememberLauncherForActivityResult
 
@@ -95,7 +95,7 @@ fun GeminiProScreen(
 
     // --- Document Launcher for "Save to File" ---
     val documentLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("text/plain")
+        contract = ActivityResultContracts.CreateDocument("text/plain"),
     ) { uri ->
         uri?.let {
             context.contentResolver.openOutputStream(it)?.use { stream ->
@@ -113,7 +113,7 @@ fun GeminiProScreen(
                 is GeminiSideEffect.ShowToast -> Toast.makeText(
                     context,
                     effect.message,
-                    Toast.LENGTH_SHORT
+                    Toast.LENGTH_SHORT,
                 ).show()
 
                 is GeminiSideEffect.LaunchSaveToFile -> documentLauncher.launch("gemini-note.txt")
@@ -129,7 +129,7 @@ fun GeminiProScreen(
     LaunchedEffect(clipboardManager) {
         clipboardManager.addPrimaryClipChangedListener {
             val clipData = clipboardManager.primaryClip
-            if (clipData != null && clipData.itemCount > 0) {
+            if ((clipData != null) && (clipData.itemCount > 0)) {
                 val text = clipData.getItemAt(0).text.toString()
                 clipboardText = text
                 viewModel.onClipboardTextChanged(text)
@@ -156,7 +156,7 @@ fun GeminiProScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.background),
     ) {
         GeminiWebViewer(
             modifier = modifier.fillMaxSize(),
@@ -173,13 +173,13 @@ fun GeminiProScreen(
                 viewModel.onEvent(
                     GeminiUiEvent.WebViewNavigated(
                         canGoBack = webView.canGoBack(),
-                        url = webView.url
+                        url = webView.url,
                     )
                 )
                 viewModel.onEvent(GeminiUiEvent.ApplicationReady)
             },
-            onCameraTmpFileCreated = { uri ->
-                tempCameraUri = uri
+            onCameraTmpFileCreated = { 
+                tempCameraUri = it 
             }
         )
 
@@ -313,7 +313,7 @@ fun UpdateAvailableDialog(
 
 @Composable
 fun BoxScope.BrowserProgressBar(progress: Int) {
-    val isVisible = progress in 1..99
+    val isVisible = ((progress in 1..99))
 
     AnimatedVisibility(
         visible = isVisible,

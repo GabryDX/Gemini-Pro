@@ -39,7 +39,7 @@ private const val TAG = "WebViewManager"
 
 class WebViewManager(
     private val context: Context,
-    private val activity: WeakReference<ComponentActivity>
+    private val activity: WeakReference<ComponentActivity>,
 ) {
     var onShowFileChooser: (ValueCallback<Array<Uri>>, Intent) -> Unit = { _, _ -> }
 
@@ -113,7 +113,7 @@ class WebViewManager(
         override fun onShowFileChooser(
             webView: WebView,
             filePathCallback: ValueCallback<Array<Uri>>,
-            fileChooserParams: FileChooserParams
+            fileChooserParams: FileChooserParams,
         ): Boolean {
             var photoUri: Uri? = null
             var captureIntent: Intent? = null
@@ -142,8 +142,8 @@ class WebViewManager(
             chooserIntent.putExtra(Intent.EXTRA_INTENT, galleryIntent)
             chooserIntent.putExtra(Intent.EXTRA_TITLE, "Upload Image")
 
-            if (captureIntent != null) {
-                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(captureIntent))
+            captureIntent?.let {
+                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(it))
             }
 
             onShowFileChooser(filePathCallback, chooserIntent)
@@ -176,7 +176,7 @@ class WebViewManager(
             }
 
             decorView.addView(fullscreenContainer, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-            setFullscreen(true, currentActivity)
+            setFullscreen(enabled = true, activity = currentActivity)
 
             onBackPressedCallback = object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() { onHideCustomView() }
@@ -188,7 +188,7 @@ class WebViewManager(
             val currentActivity = activity.get() ?: return
             if (customView == null) return
 
-            setFullscreen(false, currentActivity)
+            setFullscreen(enabled = false, activity = currentActivity)
             (fullscreenContainer?.parent as? ViewGroup)?.removeView(fullscreenContainer)
 
             fullscreenContainer = null
@@ -218,7 +218,7 @@ class WebViewManager(
 
             onProgressChanged(newProgress)
 
-            if (newProgress == 100 && currentUrl != null && currentUrl != lastUrl) {
+            if ((newProgress == 100) && (currentUrl != null) && (currentUrl != lastUrl)) {
                 lastUrl = currentUrl
                 onPageFinished.invoke(view, currentUrl)
             }
