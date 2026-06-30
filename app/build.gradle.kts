@@ -2,8 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("kotlin-kapt")
     alias(libs.plugins.hilt.android.plugin)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -34,15 +34,20 @@ android {
         jvmToolchain(21)
     }
 
-    hilt {
-        enableAggregatingTask = false
-    }
-
     buildFeatures {
         compose = true
         buildConfig = true
     }
 }
+
+hilt {
+    enableAggregatingTask = true
+}
+
+// Remove kapt block since we are using KSP
+// kapt {
+//    correctErrorTypes = true
+// }
 
 dependencies {
 
@@ -63,7 +68,7 @@ dependencies {
     implementation(libs.datastore)
 
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
     testImplementation(libs.junit)
