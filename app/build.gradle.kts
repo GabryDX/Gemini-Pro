@@ -29,14 +29,14 @@ android {
         }
     }
 
-    kotlin {
-        jvmToolchain(21)
-    }
-
     buildFeatures {
         compose = true
         buildConfig = true
     }
+}
+
+kotlin {
+    jvmToolchain(21)
 }
 
 hilt {

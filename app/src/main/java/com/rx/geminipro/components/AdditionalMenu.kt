@@ -30,7 +30,7 @@ import kotlin.collections.forEach
 data class MenuItemData(
     val painterResId: Int,
     val name: String,
-    val onClick: () -> Unit
+    val onClick: () -> Unit,
 )
 
 @Composable
@@ -79,12 +79,11 @@ fun AdditionalMenu(
             items.forEach { item ->
                 AdditionalMenuItem(
                     painter = painterResource(id = item.painterResId),
-                    name = item.name,
-                    onClick = {
-                        item.onClick()
-                        onClose()
-                    }
-                )
+                    name = item.name
+                ) {
+                    item.onClick()
+                    onClose()
+                }
             }
         }
     }
