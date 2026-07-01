@@ -36,6 +36,15 @@ android {
     }
 }
 
+androidComponents {
+    onVariants { variant ->
+        variant.outputs.forEach { output ->
+            @Suppress("UnstableApiUsage")
+            output.outputFileName.set("GeminiPro-v${output.versionName.get()}.apk")
+        }
+    }
+}
+
 kotlin {
     jvmToolchain(21)
 }
