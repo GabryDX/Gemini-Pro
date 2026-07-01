@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.rx.geminipro.utils.system.UpdateChecker
+import com.rx.geminipro.R
 import kotlinx.coroutines.flow.firstOrNull
 
 @HiltViewModel
@@ -233,11 +234,11 @@ class GeminiViewModel @Inject constructor(
         if (url != null) {
             clipboardHelper.copy(url, "Copied URL")
             viewModelScope.launch {
-                _sideEffectChannel.send(GeminiSideEffect.ShowToast("Link copied!"))
+                _sideEffectChannel.send(GeminiSideEffect.ShowToast(getApplication<Application>().getString(R.string.link_copied)))
             }
         } else {
             viewModelScope.launch {
-                _sideEffectChannel.send(GeminiSideEffect.ShowToast("No URL to copy."))
+                _sideEffectChannel.send(GeminiSideEffect.ShowToast(getApplication<Application>().getString(R.string.no_url_to_copy)))
             }
         }
     }

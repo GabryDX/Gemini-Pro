@@ -25,7 +25,7 @@ fun HtmlViewer(htmlContent: String) {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            settings.javaScriptEnabled = false
+            settings.javaScriptEnabled = true
             settings.setSupportZoom(true)
             settings.builtInZoomControls = true
             settings.displayZoomControls = false

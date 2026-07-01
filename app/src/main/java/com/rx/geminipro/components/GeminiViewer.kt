@@ -169,7 +169,7 @@ fun GeminiWebViewer(
                                     } else {
                                         Toast.makeText(
                                             context,
-                                            "No video found at this location",
+                                            context.getString(com.rx.geminipro.R.string.no_video_found),
                                             Toast.LENGTH_SHORT,
                                         ).show()
                                     }

@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -238,80 +239,6 @@ fun GeminiProScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun UpdateAvailableDialog(
-    newVersion: String,
-    changelog: String,
-    onDismiss: () -> Unit,
-    onDownload: () -> Unit,
-    onSkipVersion: () -> Unit
-) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = { WindowInsets(0, 0, 0, 0) }
-    ) {
-        Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            Text(
-                modifier = Modifier.align(Alignment.CenterHorizontally).padding(vertical = 20.dp),
-                text = "New Update Available",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                modifier = Modifier.align(Alignment.Start).padding(start = 20.dp),
-                text = "Version $newVersion is available.\nWould you like to download it?"
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Column(Modifier.padding(horizontal = 20.dp)) {
-                Text(
-                    text = "What's New:",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Box(
-                    modifier = Modifier
-                        .heightIn(max = 200.dp)
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                        .padding(8.dp)
-                        .verticalScroll(androidx.compose.foundation.rememberScrollState())
-                ) {
-                    Text(
-                        text = changelog,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
-
-            Row (modifier = Modifier.navigationBarsPadding().padding(vertical = 20.dp).align(Alignment.CenterHorizontally)){
-                TextButton(
-                    onClick = onSkipVersion,
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    )
-                ) {
-                    Text("Skip this version")
-                }
-
-                TextButton(onClick = onDismiss) {
-                    Text("Remind me later")
-                }
-
-                TextButton(onClick = onDownload) {
-                    Text("Download")
-                }
-            }
-        }
-    }
-}
-
 @Composable
 fun BoxScope.BrowserProgressBar(progress: Int) {
     val isVisible = ((progress in 1..99))
@@ -355,7 +282,7 @@ private fun BoxScope.VideoModeIndicator(isVisible: Boolean){
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Tap and hold the video to download it",
+                text = stringResource(R.string.tap_and_hold_video),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
@@ -372,8 +299,8 @@ private fun BoxScope.PreviewButtons(
 ) {
     val isVisible = clipboardContentType != ClipboardContentType.NONE
     val buttonText = when (clipboardContentType) {
-        ClipboardContentType.DIAGRAM -> "Show Diagram"
-        ClipboardContentType.HTML -> "Preview HTML"
+        ClipboardContentType.DIAGRAM -> stringResource(R.string.show_diagram)
+        ClipboardContentType.HTML -> stringResource(R.string.preview_html)
         else -> ""
     }
     val onClick = when (clipboardContentType) {
