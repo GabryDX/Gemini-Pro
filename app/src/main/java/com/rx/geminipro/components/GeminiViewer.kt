@@ -35,7 +35,7 @@ fun GeminiWebViewer(
     onWebViewCreated: (WebView) -> Unit,
     onProgressChanged: (Int) -> Unit,
     onPageFinished: (WebView, String) -> Unit,
-    onCameraTmpFileCreated: (Uri) -> Unit
+    onCameraTmpFileCreated: (Uri) -> Unit,
 ) {
     val context = LocalContext.current
     val activity = LocalActivity.current as ComponentActivity
@@ -82,13 +82,13 @@ fun GeminiWebViewer(
                 val webView = WebView(ctx).apply {
                     layoutParams = android.widget.FrameLayout.LayoutParams(
                         MATCH_PARENT,
-                        MATCH_PARENT
+                        MATCH_PARENT,
                     )
                     setBackgroundColor(Color.Transparent.toArgb())
 
                     addJavascriptInterface(
                         com.rx.geminipro.utils.network.BlobDownloaderInterface(context),
-                        "AndroidBlob"
+                        "AndroidBlob",
                     )
 
                     webViewManager.let { manager ->
@@ -113,20 +113,17 @@ fun GeminiWebViewer(
                         val chromeVersionToken = try {
                             val pattern = "Chrome/[.0-9]+".toRegex()
                             pattern.find(defaultUserAgent)?.value ?: "Chrome/144.0.0.0"
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             "Chrome/144.0.0.0"
                         }
                         userAgentString = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) $chromeVersionToken Mobile Safari/537.36"                    }
 
                     addJavascriptInterface(
-                        WebAppInterface(
-                            webViewRef = WeakReference(this),
-                            getRetryUrl = { initialUrl }
-                        ),
+                        WebAppInterface(WeakReference(this)) { initialUrl },
                         "Android"
                     )
 
-                    setOnTouchListener { v, event ->
+                    setOnTouchListener { _, event ->
                         if (event.action == android.view.MotionEvent.ACTION_DOWN) {
                             lastTouchX = event.x.toInt()
                             lastTouchY = event.y.toInt()
@@ -134,7 +131,7 @@ fun GeminiWebViewer(
                         false
                     }
 
-                    setOnCreateContextMenuListener { menu, v, menuInfo ->
+                    setOnCreateContextMenuListener { menu, v, _ ->
                         val result = (v as WebView).hitTestResult
 
                         if (currentVideoMode) {
@@ -161,7 +158,7 @@ fun GeminiWebViewer(
                                 evaluateJavascript(js) { result ->
                                     val url = result?.replace("\"", "")
 
-                                    if (!url.isNullOrEmpty() && url != "null") {
+                                    if (!url.isNullOrEmpty() && (url != "null")) {
                                         webViewManager.getDownloadListener(this).onDownloadStart(
                                             url,
                                             settings.userAgentString,
@@ -173,7 +170,7 @@ fun GeminiWebViewer(
                                         Toast.makeText(
                                             context,
                                             "No video found at this location",
-                                            Toast.LENGTH_SHORT
+                                            Toast.LENGTH_SHORT,
                                         ).show()
                                     }
                                 }
@@ -181,8 +178,8 @@ fun GeminiWebViewer(
                             }
                         }
                         else{
-                            if (result.type == WebView.HitTestResult.IMAGE_TYPE ||
-                                result.type == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE) {
+                            if ((result.type == WebView.HitTestResult.IMAGE_TYPE) ||
+                                (result.type == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE)) {
 
                                 val imageUrl = result.extra
 
