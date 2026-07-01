@@ -31,6 +31,8 @@ fun HtmlViewer(htmlContent: String) {
             settings.displayZoomControls = false
             settings.useWideViewPort = true
             settings.loadWithOverviewMode = true
+            settings.allowFileAccess = false
+            settings.allowContentAccess = false
             loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
         }
     }, update = { webView ->
