@@ -5,6 +5,7 @@ import com.rx.geminipro.utils.system.UpdateInfo
 
 data class GeminiUiState(
     val isApplicationReady: Boolean = false,
+    val isUiReady: Boolean = false,
     val isKeepScreenOn: Boolean = false,
     val isMenuLeft: Boolean = false,
     val isKeyboardVisible: Boolean = false,
@@ -21,6 +22,7 @@ enum class ClipboardContentType { NONE, DIAGRAM, HTML }
 
 sealed interface GeminiUiEvent {
     object ApplicationReady : GeminiUiEvent
+    object UiReady : GeminiUiEvent
     object OpenDocsClicked : GeminiUiEvent
     object KeepScreenOnToggled : GeminiUiEvent
     object OpenFlowClicked : GeminiUiEvent

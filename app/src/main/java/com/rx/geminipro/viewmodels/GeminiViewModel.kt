@@ -49,6 +49,7 @@ class GeminiViewModel @Inject constructor(
     fun onEvent(event: GeminiUiEvent){
         when(event){
             is GeminiUiEvent.ApplicationReady -> handleApplicationReady()
+            is GeminiUiEvent.UiReady -> handleUiReady()
             is GeminiUiEvent.OpenDocsClicked -> openDocs()
             is GeminiUiEvent.KeepScreenOnToggled -> keepScreenOn()
             is GeminiUiEvent.OpenFlowClicked -> {
@@ -124,8 +125,18 @@ class GeminiViewModel @Inject constructor(
 
     private fun checkForUpdates() {
         viewModelScope.launch {
+            val lastCheckTime = userPreferencesRepository.lastUpdateCheckTimeFlow.firstOrNull() ?: 0L
+            val currentTime = System.currentTimeMillis()
+            val twentyFourHoursInMillis = 24 * 60 * 60 * 1000L
+
+            if (currentTime - lastCheckTime < twentyFourHoursInMillis) {
+                return@launch
+            }
+
             val updateInfo = UpdateChecker.checkForNewVersion()
             val skippedVersion = userPreferencesRepository.skippedVersionFlow.firstOrNull()
+
+            userPreferencesRepository.saveLastUpdateCheckTime(currentTime)
 
             if ((updateInfo != null) && (updateInfo.version != skippedVersion)) {
                 _uiState.update { it.copy(updateInfo = updateInfo) }
@@ -157,6 +168,12 @@ class GeminiViewModel @Inject constructor(
         if (_uiState.value.isApplicationReady) return
 
         _uiState.update { it.copy(isApplicationReady = true) }
+    }
+
+    private fun handleUiReady() {
+        if (_uiState.value.isUiReady) return
+
+        _uiState.update { it.copy(isUiReady = true) }
     }
 
     private fun setMenuPosition(isLeft: Boolean) {

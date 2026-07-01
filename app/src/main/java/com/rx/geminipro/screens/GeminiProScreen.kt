@@ -165,6 +165,7 @@ fun GeminiProScreen(
             isVideoSelectionMode = uiState.isVideoSelectionMode,
             onWebViewCreated = { createdWebView ->
                 webView = createdWebView
+                viewModel.onEvent(GeminiUiEvent.UiReady)
             },
             onProgressChanged = { progress ->
                 viewModel.onEvent(GeminiUiEvent.LoadingProgressChanged(progress))
