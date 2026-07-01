@@ -127,7 +127,7 @@ class WebViewManager(
                     photoFile
                 )
 
-                onCameraTmpFileCreated(photoUri)
+                photoUri?.let { onCameraTmpFileCreated(it) }
 
                 captureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
                 captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
