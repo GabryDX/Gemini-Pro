@@ -25,12 +25,14 @@ fun HtmlViewer(htmlContent: String) {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            settings.javaScriptEnabled = true
+            settings.javaScriptEnabled = false
             settings.setSupportZoom(true)
             settings.builtInZoomControls = true
             settings.displayZoomControls = false
             settings.useWideViewPort = true
             settings.loadWithOverviewMode = true
+            settings.allowFileAccess = false
+            settings.allowContentAccess = false
             loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
         }
     }, update = { webView ->

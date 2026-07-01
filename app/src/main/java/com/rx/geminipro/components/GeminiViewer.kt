@@ -103,8 +103,8 @@ fun GeminiWebViewer(
                         mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                         mediaPlaybackRequiresUserGesture = false
                         cacheMode = WebSettings.LOAD_DEFAULT
-                        allowFileAccess = true
-                        allowContentAccess = true
+                        allowFileAccess = false
+                        allowContentAccess = false
                         javaScriptCanOpenWindowsAutomatically = true
                         setSupportMultipleWindows(false)
 

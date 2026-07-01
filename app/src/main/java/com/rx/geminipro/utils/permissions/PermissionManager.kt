@@ -23,7 +23,6 @@ fun GetPermissions(context: Context)
 {
     val basePermissions = mutableListOf(
         android.Manifest.permission.CAMERA,
-        android.Manifest.permission.MODIFY_AUDIO_SETTINGS,
         android.Manifest.permission.RECORD_AUDIO
     )
 
