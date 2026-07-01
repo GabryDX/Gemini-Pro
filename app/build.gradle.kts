@@ -74,7 +74,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.datastore.preferences)
-    implementation(libs.datastore)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
