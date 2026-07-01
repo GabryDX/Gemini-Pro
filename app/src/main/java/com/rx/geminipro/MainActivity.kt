@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen().apply {
             setKeepOnScreenCondition {
-                !geminiViewModel.uiState.value.isUiReady
+                !geminiViewModel.uiState.value.isApplicationReady
             }
             setOnExitAnimationListener { screen ->
                 screen.remove()

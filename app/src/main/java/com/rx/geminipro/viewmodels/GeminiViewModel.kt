@@ -50,7 +50,6 @@ class GeminiViewModel @Inject constructor(
     fun onEvent(event: GeminiUiEvent){
         when(event){
             is GeminiUiEvent.ApplicationReady -> handleApplicationReady()
-            is GeminiUiEvent.UiReady -> handleUiReady()
             is GeminiUiEvent.OpenDocsClicked -> openDocs()
             is GeminiUiEvent.KeepScreenOnToggled -> keepScreenOn()
             is GeminiUiEvent.OpenFlowClicked -> {
@@ -169,12 +168,6 @@ class GeminiViewModel @Inject constructor(
         if (_uiState.value.isApplicationReady) return
 
         _uiState.update { it.copy(isApplicationReady = true) }
-    }
-
-    private fun handleUiReady() {
-        if (_uiState.value.isUiReady) return
-
-        _uiState.update { it.copy(isUiReady = true) }
     }
 
     private fun setMenuPosition(isLeft: Boolean) {
