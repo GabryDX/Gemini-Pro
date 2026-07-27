@@ -30,14 +30,14 @@ import kotlin.collections.forEach
 data class MenuItemData(
     val painterResId: Int,
     val name: String,
-    val onClick: () -> Unit
+    val onClick: () -> Unit,
 )
 
 @Composable
 fun AdditionalMenuItem(painter: Painter, name: String, onClick: () -> Unit)
 {
     val haptic = LocalHapticFeedback.current
-    Column(modifier = Modifier.padding(horizontal = 5.dp),){
+    Column(modifier = Modifier.padding(horizontal = 5.dp)){
         IconButton(
             modifier = Modifier.align(Alignment.CenterHorizontally).size(70.dp),
             onClick =
@@ -79,12 +79,11 @@ fun AdditionalMenu(
             items.forEach { item ->
                 AdditionalMenuItem(
                     painter = painterResource(id = item.painterResId),
-                    name = item.name,
-                    onClick = {
-                        item.onClick()
-                        onClose()
-                    }
-                )
+                    name = item.name
+                ) {
+                    item.onClick()
+                    onClose()
+                }
             }
         }
     }

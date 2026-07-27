@@ -16,7 +16,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,9 +24,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rx.geminipro.R
 import com.rx.geminipro.components.*
@@ -39,7 +38,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun GeminiProScreen(
     modifier: Modifier = Modifier,
-    viewModel: GeminiViewModel = hiltViewModel()
+    viewModel: GeminiViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -47,11 +46,11 @@ fun GeminiProScreen(
 
     var webView by remember { mutableStateOf<WebView?>(null) }
 
-    var showAdditionalMenu by remember { mutableStateOf(false) }
-    var showDiagram by remember { mutableStateOf(false) }
-    var showHtmlPreview by remember { mutableStateOf(false) }
-    var clipboardText by remember { mutableStateOf("") }
-    var isHighlightingMenu by remember { mutableStateOf(false) }
+    var showAdditionalMenu by remember { mutableStateOf(value = false) }
+    var showDiagram by remember { mutableStateOf(value = false) }
+    var showHtmlPreview by remember { mutableStateOf(value = false) }
+    var clipboardText by remember { mutableStateOf(value = "") }
+    var isHighlightingMenu by remember { mutableStateOf(value = false) }
 
     var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -64,7 +63,7 @@ fun GeminiProScreen(
     // --- File Picker Setup ---
     val filePathCallbackState = remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
     val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
+        contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
         if (filePathCallbackState.value == null) return@rememberLauncherForActivityResult
 
@@ -95,7 +94,7 @@ fun GeminiProScreen(
 
     // --- Document Launcher for "Save to File" ---
     val documentLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("text/plain")
+        contract = ActivityResultContracts.CreateDocument("text/plain"),
     ) { uri ->
         uri?.let {
             context.contentResolver.openOutputStream(it)?.use { stream ->
@@ -113,7 +112,7 @@ fun GeminiProScreen(
                 is GeminiSideEffect.ShowToast -> Toast.makeText(
                     context,
                     effect.message,
-                    Toast.LENGTH_SHORT
+                    Toast.LENGTH_SHORT,
                 ).show()
 
                 is GeminiSideEffect.LaunchSaveToFile -> documentLauncher.launch("gemini-note.txt")
@@ -129,7 +128,7 @@ fun GeminiProScreen(
     LaunchedEffect(clipboardManager) {
         clipboardManager.addPrimaryClipChangedListener {
             val clipData = clipboardManager.primaryClip
-            if (clipData != null && clipData.itemCount > 0) {
+            if ((clipData != null) && (clipData.itemCount > 0)) {
                 val text = clipData.getItemAt(0).text.toString()
                 clipboardText = text
                 viewModel.onClipboardTextChanged(text)
@@ -156,7 +155,7 @@ fun GeminiProScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.background),
     ) {
         GeminiWebViewer(
             modifier = modifier.fillMaxSize(),
@@ -173,13 +172,13 @@ fun GeminiProScreen(
                 viewModel.onEvent(
                     GeminiUiEvent.WebViewNavigated(
                         canGoBack = webView.canGoBack(),
-                        url = webView.url
+                        url = webView.url,
                     )
                 )
                 viewModel.onEvent(GeminiUiEvent.ApplicationReady)
             },
-            onCameraTmpFileCreated = { uri ->
-                tempCameraUri = uri
+            onCameraTmpFileCreated = { 
+                tempCameraUri = it 
             }
         )
 
@@ -237,83 +236,9 @@ fun GeminiProScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun UpdateAvailableDialog(
-    newVersion: String,
-    changelog: String,
-    onDismiss: () -> Unit,
-    onDownload: () -> Unit,
-    onSkipVersion: () -> Unit
-) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = { WindowInsets(0, 0, 0, 0) }
-    ) {
-        Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            Text(
-                modifier = Modifier.align(Alignment.CenterHorizontally).padding(vertical = 20.dp),
-                text = "New Update Available",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                modifier = Modifier.align(Alignment.Start).padding(start = 20.dp),
-                text = "Version $newVersion is available.\nWould you like to download it?"
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Column(Modifier.padding(horizontal = 20.dp)) {
-                Text(
-                    text = "What's New:",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Box(
-                    modifier = Modifier
-                        .heightIn(max = 200.dp)
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                        .padding(8.dp)
-                        .verticalScroll(androidx.compose.foundation.rememberScrollState())
-                ) {
-                    Text(
-                        text = changelog,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
-
-            Row (modifier = Modifier.navigationBarsPadding().padding(vertical = 20.dp).align(Alignment.CenterHorizontally)){
-                TextButton(
-                    onClick = onSkipVersion,
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    )
-                ) {
-                    Text("Skip this version")
-                }
-
-                TextButton(onClick = onDismiss) {
-                    Text("Remind me later")
-                }
-
-                TextButton(onClick = onDownload) {
-                    Text("Download")
-                }
-            }
-        }
-    }
-}
-
 @Composable
 fun BoxScope.BrowserProgressBar(progress: Int) {
-    val isVisible = progress in 1..99
+    val isVisible = ((progress in 1..99))
 
     AnimatedVisibility(
         visible = isVisible,
@@ -354,7 +279,7 @@ private fun BoxScope.VideoModeIndicator(isVisible: Boolean){
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Tap and hold the video to download it",
+                text = stringResource(R.string.tap_and_hold_video),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
@@ -371,8 +296,8 @@ private fun BoxScope.PreviewButtons(
 ) {
     val isVisible = clipboardContentType != ClipboardContentType.NONE
     val buttonText = when (clipboardContentType) {
-        ClipboardContentType.DIAGRAM -> "Show Diagram"
-        ClipboardContentType.HTML -> "Preview HTML"
+        ClipboardContentType.DIAGRAM -> stringResource(R.string.show_diagram)
+        ClipboardContentType.HTML -> stringResource(R.string.preview_html)
         else -> ""
     }
     val onClick = when (clipboardContentType) {

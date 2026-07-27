@@ -4,11 +4,20 @@ A lightweight WebView-based application for accessing **Google AI Studio** with 
 
 # Features
 
-* Instant diagram viewing when copying mermaid code
-* Instant HTML page viewing when copying generated HTML code
-* The ability to immediately save the copied text to a text file
-* **Caffeine mode** - does not allow the phone to turn off the screen
-* Press and hold to download image or video
+*   **Instant Diagram Viewing**: Automatically detect and render Mermaid diagrams from copied text.
+*   **HTML Preview**: Instantly view and interact with generated HTML code snippets.
+*   **Save to File**: Quick option to save copied text directly to a `.txt` file.
+*   **Caffeine Mode**: Prevent the screen from turning off while you're deep in your workflow.
+*   **Media Downloads**:
+    *   **Images**: Press and hold on any image to save it.
+    *   **Videos**: Enable **Video Selection Mode** from the menu, then long-press on a video to download it.
+*   **Quick Access Tools**: Direct links to **Google Docs** and **Google Flow (Fx)** via the additional menu.
+*   **Navigation & Sharing**: Share the current page, copy links, and navigate forward/backward easily.
+*   **Customizable UI**: Choose between left or right side placement for the menu handle to suit your preference.
+*   **Gestures**:
+    *   **Reload**: Swipe down from the top center handle.
+    *   **Menu**: Swipe from the side handle to open additional features.
+*   **Update System**: Built-in notifications to keep you on the latest version.
 
 # How to use
 
@@ -22,9 +31,14 @@ Grant permission to Google Drive.
 
 Once permissions are set, you can start using the app immediately.
 
+**3. Gestures & Navigation**
 
-> Note:
-This step is required due to Google’s security policy, which cannot be bypassed.
+*   **Reload Page**: Drag down from the top center of the screen.
+*   **Open Additional Menu**: Drag the side handle (left or right).
+*   **Download Video**: Open the additional menu, tap **Download Video**, then long-press on a video element on the page.
+
+> **Note:**
+The initial Google Drive permission step is required due to Google’s security policy, which cannot be bypassed in a custom WebView.
 
 # Screenshots
 
@@ -35,7 +49,7 @@ This step is required due to Google’s security policy, which cannot be bypasse
 
 # Development Environment
 
-**Gemimi Pro** uses the Gradle build system and can be imported directly into Android Studio (make sure you are using the latest stable version available [here](https://developer.android.com/studio)). 
+**Gemini Pro** uses the Gradle build system and can be imported directly into Android Studio (make sure you are using the latest stable version).
 
 Change the run configuration to `app`.
 
@@ -44,4 +58,3 @@ Change the run configuration to `app`.
 The `Debug` and `Release` build variants can be built and run.
 
 ![image](https://github.com/user-attachments/assets/99c8078d-37b7-45ce-a721-ede96289ee2e)
-

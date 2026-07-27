@@ -15,12 +15,14 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import com.rx.geminipro.utils.network.WebAppInterface
 import java.lang.ref.WeakReference
@@ -35,18 +37,23 @@ fun GeminiWebViewer(
     onWebViewCreated: (WebView) -> Unit,
     onProgressChanged: (Int) -> Unit,
     onPageFinished: (WebView, String) -> Unit,
-    onCameraTmpFileCreated: (Uri) -> Unit
+    onCameraTmpFileCreated: (Uri) -> Unit,
 ) {
     val context = LocalContext.current
-    val activity = LocalActivity.current as ComponentActivity
+    val activity = LocalActivity.current as? ComponentActivity
     val initialUrl = "https://aistudio.google.com/u/0/prompts/new_chat"
     val spoofHeaders = mapOf("X-Requested-With" to "")
 
     val currentVideoMode by rememberUpdatedState(isVideoSelectionMode)
     val currentCameraCallback by rememberUpdatedState(onCameraTmpFileCreated)
+    val currentProgressCallback by rememberUpdatedState(onProgressChanged)
+    val currentPageFinishedCallback by rememberUpdatedState(onPageFinished)
 
-    var lastTouchX = 0
-    var lastTouchY = 0
+    val lastTouchX = remember { mutableFloatStateOf(0f) }
+    val lastTouchY = remember { mutableFloatStateOf(0f) }
+
+    val noVideoFoundText = stringResource(com.rx.geminipro.R.string.no_video_found)
+    val currentNoVideoFoundText by rememberUpdatedState(noVideoFoundText)
 
     val webViewManager = remember(context, activity) {
         WebViewManager(context, WeakReference(activity)).apply {
@@ -64,8 +71,8 @@ fun GeminiWebViewer(
                     filePathCallbackState.value = null
                 }
             }
-            this.onProgressChanged = onProgressChanged
-            this.onPageFinished = onPageFinished
+            this.onProgressChanged = { currentProgressCallback(it) }
+            this.onPageFinished = { view, url -> currentPageFinishedCallback(view, url) }
             this.onPermissionRequest = { request -> request.grant(request.resources) }
             this.onCameraTmpFileCreated = { uri ->
                 currentCameraCallback(uri)
@@ -82,13 +89,13 @@ fun GeminiWebViewer(
                 val webView = WebView(ctx).apply {
                     layoutParams = android.widget.FrameLayout.LayoutParams(
                         MATCH_PARENT,
-                        MATCH_PARENT
+                        MATCH_PARENT,
                     )
                     setBackgroundColor(Color.Transparent.toArgb())
 
                     addJavascriptInterface(
                         com.rx.geminipro.utils.network.BlobDownloaderInterface(context),
-                        "AndroidBlob"
+                        "AndroidBlob",
                     )
 
                     webViewManager.let { manager ->
@@ -103,46 +110,44 @@ fun GeminiWebViewer(
                         mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                         mediaPlaybackRequiresUserGesture = false
                         cacheMode = WebSettings.LOAD_DEFAULT
-                        allowFileAccess = true
-                        allowContentAccess = true
+                        allowFileAccess = false
+                        allowContentAccess = false
                         javaScriptCanOpenWindowsAutomatically = true
                         setSupportMultipleWindows(false)
 
-                        val defaultUserAgent = userAgentString
+                        val defaultUserAgent = userAgentString ?: ""
 
                         val chromeVersionToken = try {
                             val pattern = "Chrome/[.0-9]+".toRegex()
                             pattern.find(defaultUserAgent)?.value ?: "Chrome/144.0.0.0"
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             "Chrome/144.0.0.0"
                         }
                         userAgentString = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) $chromeVersionToken Mobile Safari/537.36"                    }
 
                     addJavascriptInterface(
-                        WebAppInterface(
-                            webViewRef = WeakReference(this),
-                            getRetryUrl = { initialUrl }
-                        ),
+                        WebAppInterface(WeakReference(this as WebView?)) { initialUrl },
                         "Android"
                     )
 
-                    setOnTouchListener { v, event ->
+                    setOnTouchListener { _, event ->
                         if (event.action == android.view.MotionEvent.ACTION_DOWN) {
-                            lastTouchX = event.x.toInt()
-                            lastTouchY = event.y.toInt()
+                            lastTouchX.floatValue = event.x
+                            lastTouchY.floatValue = event.y
                         }
                         false
                     }
 
-                    setOnCreateContextMenuListener { menu, v, menuInfo ->
-                        val result = (v as WebView).hitTestResult
+                    setOnCreateContextMenuListener { menu, v, _ ->
+                        val hitTestWebView = v as WebView
+                        val result = hitTestWebView.hitTestResult
 
                         if (currentVideoMode) {
                             menu.add("Download Video Here").setOnMenuItemClickListener {
 
                                 val density = resources.displayMetrics.density
-                                val cssX = lastTouchX / density
-                                val cssY = lastTouchY / density
+                                val cssX = lastTouchX.floatValue / density
+                                val cssY = lastTouchY.floatValue / density
 
                                 val js = """
                              (function() {
@@ -158,22 +163,22 @@ fun GeminiWebViewer(
                              })();
                          """.trimIndent()
 
-                                evaluateJavascript(js) { result ->
-                                    val url = result?.replace("\"", "")
+                                evaluateJavascript(js) { resultJs ->
+                                    val url = resultJs?.replace("\"", "")
 
-                                    if (!url.isNullOrEmpty() && url != "null") {
+                                    if (!url.isNullOrEmpty() && (url != "null")) {
                                         webViewManager.getDownloadListener(this).onDownloadStart(
                                             url,
                                             settings.userAgentString,
                                             "video.mp4",
                                             "video/mp4",
-                                            0
+                                            0L
                                         )
                                     } else {
                                         Toast.makeText(
                                             context,
-                                            "No video found at this location",
-                                            Toast.LENGTH_SHORT
+                                            currentNoVideoFoundText,
+                                            Toast.LENGTH_SHORT,
                                         ).show()
                                     }
                                 }
@@ -181,8 +186,8 @@ fun GeminiWebViewer(
                             }
                         }
                         else{
-                            if (result.type == WebView.HitTestResult.IMAGE_TYPE ||
-                                result.type == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE) {
+                            if ((result.type == WebView.HitTestResult.IMAGE_TYPE) ||
+                                (result.type == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE)) {
 
                                 val imageUrl = result.extra
 
@@ -193,7 +198,7 @@ fun GeminiWebViewer(
                                             settings.userAgentString,
                                             "attachment",
                                             "image/png",
-                                            0
+                                            0L
                                         )
                                         true
                                     }

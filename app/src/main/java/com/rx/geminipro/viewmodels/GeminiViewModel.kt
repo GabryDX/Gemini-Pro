@@ -10,7 +10,7 @@ import com.rx.geminipro.data.UserPreferencesRepository
 import com.rx.geminipro.utils.services.GoogleServices
 import com.rx.geminipro.utils.system.ClipboardHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
-import jakarta.inject.Inject
+import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.rx.geminipro.utils.system.UpdateChecker
+import com.rx.geminipro.R
 import kotlinx.coroutines.flow.firstOrNull
 
 @HiltViewModel
@@ -27,7 +28,7 @@ class GeminiViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val googleServices: GoogleServices,
     private val clipboardHelper: ClipboardHelper,
-    application: Application
+    application: Application,
 ) : AndroidViewModel(application) {
     private val  _uiState = MutableStateFlow(GeminiUiState())
     val uiState: StateFlow<GeminiUiState> = _uiState.asStateFlow()
@@ -84,9 +85,11 @@ class GeminiViewModel @Inject constructor(
             is GeminiUiEvent.UpdateClicked -> {
                 val url = UpdateChecker.getReleaseUrl()
                 viewModelScope.launch {
-                    _sideEffectChannel.send(GeminiSideEffect.LaunchIntent(
-                        Intent(Intent.ACTION_VIEW, url.toUri())
-                    ))
+                    _sideEffectChannel.send(
+                        GeminiSideEffect.LaunchIntent(
+                            Intent(Intent.ACTION_VIEW, url.toUri()),
+                        )
+                    )
                 }
                 _uiState.update { it.copy(updateInfo = null) }
             }
@@ -122,10 +125,20 @@ class GeminiViewModel @Inject constructor(
 
     private fun checkForUpdates() {
         viewModelScope.launch {
+            val lastCheckTime = userPreferencesRepository.lastUpdateCheckTimeFlow.firstOrNull() ?: 0L
+            val currentTime = System.currentTimeMillis()
+            val twentyFourHoursInMillis = 24 * 60 * 60 * 1000L
+
+            if (currentTime - lastCheckTime < twentyFourHoursInMillis) {
+                return@launch
+            }
+
             val updateInfo = UpdateChecker.checkForNewVersion()
             val skippedVersion = userPreferencesRepository.skippedVersionFlow.firstOrNull()
 
-            if (updateInfo != null && updateInfo.version != skippedVersion) {
+            userPreferencesRepository.saveLastUpdateCheckTime(currentTime)
+
+            if ((updateInfo != null) && (updateInfo.version != skippedVersion)) {
                 _uiState.update { it.copy(updateInfo = updateInfo) }
             }
         }
@@ -214,11 +227,11 @@ class GeminiViewModel @Inject constructor(
         if (url != null) {
             clipboardHelper.copy(url, "Copied URL")
             viewModelScope.launch {
-                _sideEffectChannel.send(GeminiSideEffect.ShowToast("Link copied!"))
+                _sideEffectChannel.send(GeminiSideEffect.ShowToast(getApplication<Application>().getString(R.string.link_copied)))
             }
         } else {
             viewModelScope.launch {
-                _sideEffectChannel.send(GeminiSideEffect.ShowToast("No URL to copy."))
+                _sideEffectChannel.send(GeminiSideEffect.ShowToast(getApplication<Application>().getString(R.string.no_url_to_copy)))
             }
         }
     }
